@@ -1,0 +1,19 @@
+{
+  "_help": "Add or remove job sources here. 'cat' is gov, private, remote or auto (decided from the title). 'query' entries are Google News searches.",
+  "rss": [
+    {"name": "BD Jobs Careers", "url": "https://www.bdjobscareers.com/feed/", "cat": "auto"},
+    {"name": "BD Govt Job", "url": "https://bdgovtjob.net/feed/", "cat": "gov"},
+    {"name": "Best BD Job", "url": "https://bestbdjob.com/feed/", "cat": "auto"},
+    {"name": "Chakrir Khobor", "url": "https://chakrirkhobor.net/feed/", "cat": "auto"},
+    {"name": "Job Circular BD", "url": "https://jobcircular.info/feed/", "cat": "auto"},
+    {"name": "We Work Remotely", "url": "https://weworkremotely.com/remote-jobs.rss", "cat": "remote"}
+  ],
+  "google_news": [
+    {"name": "Google News (Bangla)", "query": "নিয়োগ বিজ্ঞপ্তি", "hl": "bn", "cat": "auto"},
+    {"name": "Google News (Govt)", "query": "সরকারি চাকরি নিয়োগ বিজ্ঞপ্তি teletalk", "hl": "bn", "cat": "gov"},
+    {"name": "Google News (English)", "query": "job circular Bangladesh", "hl": "en", "cat": "auto"},
+    {"name": "Google News (Engineer)", "query": "assistant engineer job circular Bangladesh EEE", "hl": "en", "cat": "auto"},
+    {"name": "Google News (Admit/Result)", "query": "admit card exam date result job Bangladesh teletalk", "hl": "en", "cat": "auto"}
+  ],
+  "remote_apis": ["remotive", "arbeitnow", "jobicy", "remoteok", "himalayas"]
+}

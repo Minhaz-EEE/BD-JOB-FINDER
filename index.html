@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b5ed7">
+<title>Chakri Finder</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+:root{--blue:#0b5ed7;--navy:#0a2a66;--sky:#e8f1ff;--line:#d5e2f7;--ink:#10203b;--mute:#5b6b85;--bg:#f3f7fd;--card:#fff;--ok:#12805c;--warn:#b45309;--bad:#c0262d}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans Bengali",sans-serif}
+header{position:sticky;top:0;z-index:5;background:linear-gradient(135deg,var(--navy),var(--blue));color:#fff;padding:12px 16px;display:flex;align-items:center;gap:10px}
+header h1{font-size:18px;margin:0;flex:1;letter-spacing:.2px}
+header small{display:block;font-weight:400;font-size:11px;opacity:.85}
+header button{background:rgba(255,255,255,.16);border:0;color:#fff;border-radius:10px;padding:8px 10px;font-size:16px;position:relative}
+header .dot{position:absolute;top:-4px;right:-4px;background:#ffb020;color:#10203b;border-radius:9px;font-size:10px;padding:1px 5px;font-weight:700}
+main{padding:14px 14px 90px;max-width:760px;margin:0 auto}
+nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--line);display:flex;z-index:5;padding-bottom:env(safe-area-inset-bottom)}
+nav button{flex:1;border:0;background:none;padding:8px 2px 9px;font-size:11px;color:var(--mute);display:flex;flex-direction:column;align-items:center;gap:2px}
+nav button svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+nav button.on{color:var(--blue);font-weight:700}
+h2{font-size:16px;margin:18px 0 8px;color:var(--navy)}
+h3{font-size:15px;margin:6px 0 2px}
+p{margin:6px 0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin:10px 0;box-shadow:0 1px 2px rgba(10,42,102,.05)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tile{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;text-align:left;font:inherit;color:inherit}
+.tile b{display:block;font-size:26px;color:var(--blue);line-height:1.1}
+.tile span{font-size:12.5px;color:var(--mute)}
+.tile.hot b{color:var(--warn)}
+.hero{background:linear-gradient(135deg,var(--blue),#3b8bff);color:#fff;border:0}
+.hero p{opacity:.92;margin:2px 0 0}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.tag{font-size:11px;font-weight:700;border-radius:20px;padding:2px 9px;background:var(--sky);color:var(--blue)}
+.tag.gov{background:#e2f5ec;color:var(--ok)}.tag.remote{background:#efe8ff;color:#5b3fc4}.tag.private{background:#fff1dc;color:var(--warn)}
+.tag.bad{background:#fde7e8;color:var(--bad)}.tag.ok{background:#e2f5ec;color:var(--ok)}
+.src,.meta{font-size:12.5px;color:var(--mute)}
+.match{margin-left:auto;font-size:12px;font-weight:700;color:var(--blue)}
+.desc{font-size:13.5px;color:#33435e}
+.btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.btn,button.btn{display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--line);background:#fff;color:var(--navy);border-radius:10px;padding:8px 12px;font:600 13px/1 inherit;text-decoration:none;min-height:36px}
+.btn.pri{background:var(--blue);border-color:var(--blue);color:#fff}
+.btn.danger{color:var(--bad)}
+.btn.wide{width:100%}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:4px 0 8px;scrollbar-width:none}
+.chips button{white-space:nowrap;border:1px solid var(--line);background:#fff;border-radius:20px;padding:7px 13px;font:600 13px inherit;color:var(--mute)}
+.chips button.on{background:var(--blue);border-color:var(--blue);color:#fff}
+input,select,textarea{width:100%;font:inherit;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink)}
+textarea{min-height:84px;resize:vertical}
+label{display:block;font-size:12.5px;font-weight:600;color:var(--mute);margin:10px 0 4px}
+.search{display:flex;gap:8px}
+.banner{background:#fff7e6;border:1px solid #f5d48a;color:#7a4b00;border-radius:12px;padding:10px 12px;font-size:13px;margin:10px 0}
+.alert{border-left:4px solid var(--warn)}
+.empty{text-align:center;color:var(--mute);padding:26px 10px}
+details{background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px 14px;margin:8px 0}
+summary{font-weight:700;color:var(--navy);cursor:pointer}
+ol,ul{padding-left:20px;margin:8px 0}
+li{margin:4px 0}
+#modal{position:fixed;inset:0;background:rgba(10,32,70,.5);z-index:10;display:none;align-items:flex-end;justify-content:center}
+#modal.on{display:flex}
+#modal .sheet{background:#fff;width:100%;max-width:760px;max-height:92vh;overflow:auto;border-radius:18px 18px 0 0;padding:16px 16px 26px}
+#toast{position:fixed;left:50%;bottom:84px;transform:translateX(-50%);background:var(--navy);color:#fff;padding:9px 16px;border-radius:20px;font-size:13px;z-index:20;display:none;max-width:90%}
+.copy{display:flex;justify-content:space-between;gap:10px;align-items:center;border-bottom:1px solid var(--line);padding:8px 0}
+.copy span{font-size:13.5px;word-break:break-word}.copy small{display:block;color:var(--mute);font-size:11.5px}
+#cv{background:#fff;border:1px solid var(--line);border-radius:10px;padding:22px;font-size:13.5px}
+#cv h1{font-size:22px;margin:0;color:var(--navy)}
+#cv h4{margin:14px 0 4px;font-size:13px;letter-spacing:.8px;text-transform:uppercase;color:var(--blue);border-bottom:2px solid var(--blue);padding-bottom:2px}
+#cv .sub{color:var(--mute)}#cv .item{margin:6px 0}#cv .item b{display:block}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media print{header,nav,.noprint,#toast{display:none!important}main{padding:0;max-width:none}body{background:#fff}#cv{border:0;padding:0}}
+</style>
+</head>
+<body>
+<header><h1>Chakri Finder<small id="fresh">Bangladesh &amp; remote jobs</small></h1><button id="bell" data-act="go" data-tab="home" aria-label="Alerts">🔔</button></header>
+<main id="view"></main>
+<nav id="tabs"></nav>
+<div id="modal"><div class="sheet" id="sheet"></div></div>
+<div id="toast"></div>
+<script>
+'use strict';
+/* ---------- helpers & storage ---------- */
+const $=(s,r=document)=>r.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const KEY='chakri-finder-v1',mem={};
+const ls={get(k){try{return localStorage.getItem(k)}catch(e){return mem[k]??null}},set(k,v){mem[k]=v;try{localStorage.setItem(k,v)}catch(e){}}};
+const DEF={profile:{name:'',title:'',email:'',phone:'',address:'',linkedin:'',summary:'',skills:'',experience:[],education:[],training:[],extras:''},apps:[],favs:{},settings:{aiKey:'',aiModel:'gemini-2.5-flash',notify:false},seen:{},tailor:null};
+let S=merge(JSON.parse(ls.get(KEY)||'{}'));
+function merge(o){const d=JSON.parse(JSON.stringify(DEF));return Object.assign(d,o,{profile:Object.assign(d.profile,o.profile||{}),settings:Object.assign(d.settings,o.settings||{})})}
+const save=()=>ls.set(KEY,JSON.stringify(S));
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+const pad=n=>String(n).padStart(2,'0');
+const today=()=>{const d=new Date();return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())};
+const days=d=>Math.round((new Date(d+'T00:00:00')-new Date(today()+'T00:00:00'))/864e5);
+const nice=d=>d?new Date(d+'T00:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):'';
+const inDays=n=>n===0?'today':n===1?'tomorrow':'in '+n+' days';
+function toast(t){const e=$('#toast');e.textContent=t;e.style.display='block';clearTimeout(toast.t);toast.t=setTimeout(()=>e.style.display='none',2600)}
+function download(name,text,type){const a=document.createElement('a');a.href=URL.createObjectURL(text instanceof Blob?text:new Blob([text],{type:type||'text/plain'}));a.download=name;document.body.appendChild(a);a.click();a.remove()}
+
+/* files (certificates, admit cards) live in the phone's browser storage */
+const memFiles=[];
+function idb(){return new Promise((res,rej)=>{const r=indexedDB.open('chakri-files',1);r.onupgradeneeded=()=>r.result.createObjectStore('files',{keyPath:'id'});r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)})}
+async function fileOp(mode,fn){try{const db=await idb();return await new Promise((res,rej)=>{const tx=db.transaction('files',mode);const rq=fn(tx.objectStore('files'));tx.oncomplete=()=>res(rq?rq.result:true);tx.onerror=()=>rej(tx.error)})}catch(e){return null}}
+const Files={
+  async all(){return (await fileOp('readonly',s=>s.getAll()))||memFiles},
+  async put(f){memFiles.push(f);await fileOp('readwrite',s=>s.put(f))},
+  async del(id){const i=memFiles.findIndex(f=>f.id===id);if(i>=0)memFiles.splice(i,1);await fileOp('readwrite',s=>s.delete(id))}
+};
+
+/* ---------- data ---------- */
+const SAMPLE={demo:true,updated:'',status:[],notices:[],jobs:[
+ {id:'s1',title:'Sample: Assistant Engineer (Electrical) – government circular',org:'Teletalk All Jobs portal',cat:'gov',loc:'Bangladesh',posted:'',deadline:'',url:'https://alljobs.teletalk.com.bd',src:'Sample',tags:['Engineering','EEE'],desc:'This is a sample card. Real government circulars appear here after the first automatic collection.'},
+ {id:'s2',title:'Sample: Officer (Technical) – private sector',org:'bdjobs.com',cat:'private',loc:'Dhaka',posted:'',deadline:'',url:'https://www.bdjobs.com',src:'Sample',tags:['Private'],desc:'Sample card for a private-sector job.'},
+ {id:'s3',title:'Sample: Remote Electrical Design Engineer',org:'International company',cat:'remote',loc:'Worldwide',posted:'',deadline:'',url:'https://remotive.com',src:'Sample',tags:['Remote','Engineering'],desc:'Sample card for an international remote job.'}]};
+let DB=SAMPLE;
+async function loadData(){
+  try{const r=await fetch('data/jobs.json?t='+Date.now());const d=await r.json();if(d&&d.jobs&&d.jobs.length)DB=d;else DB=Object.assign({},SAMPLE,{status:d.status||[]})}catch(e){DB=SAMPLE}
+  DB.jobs=DB.jobs.filter(j=>!j.deadline||days(j.deadline)>=0);DB.notices=DB.notices||[];
+  scoreAll();
+  $('#fresh').textContent=DB.updated?'Updated '+new Date(DB.updated).toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):'Bangladesh & remote jobs';
+}
+
+/* ---------- matching & smart search ---------- */
+const STOP=new Set('a an the and or of in for to with at on by is are as be from this that will you your our we job jobs circular new apply online has have been its their all any more about into per not can who what which also etc using use work working'.split(' '));
+const tok=s=>(String(s||'').toLowerCase().match(/[a-z][a-z+#]+|[ঀ-৿]{2,}/g)||[]).filter(w=>!STOP.has(w));
+const SYN={eee:['electrical','electronic','electronics','engineer'],electrical:['eee','electric','power','বিদ্যুৎ','প্রকৌশলী'],electronic:['eee','electronics'],engineer:['engineering','প্রকৌশলী','প্রকৌশল'],engineering:['engineer','প্রকৌশলী'],nuclear:['npcbl','rooppur','reactor','atomic','পারমাণবিক'],power:['pdb','pgcb','desco','dpdc','nesco','egcb','energy','বিদ্যুৎ'],energy:['power','renewable','solar'],finance:['bank','investment','financial','ব্যাংক'],bank:['ব্যাংক','banking','finance'],infrastructure:['project','construction'],teacher:['শিক্ষক','lecturer','teaching'],officer:['কর্মকর্তা'],govt:['সরকারি'],it:['software','developer'],software:['developer','programmer']};
+function expand(base){const set=new Set(base);base.forEach(w=>(SYN[w]||[]).forEach(x=>set.add(x)));return set}
+function profileWords(){const p=S.profile;return expand(tok([p.title,p.skills,p.summary,p.education.map(e=>e.a).join(' '),p.experience.map(e=>e.a).join(' ')].join(' ')))}
+function scoreAll(){const w=profileWords();DB.jobs.forEach(j=>{if(!w.size){j._m=0;return}let s=0;new Set(tok(j.title)).forEach(x=>{if(w.has(x))s+=3});new Set(tok((j.tags||[]).join(' ')+' '+j.desc+' '+j.org)).forEach(x=>{if(w.has(x))s+=1});j._m=Math.min(100,Math.round(s/9*100))})}
+function smart(q){
+  const low=q.toLowerCase(),f={cat:'',within:null};
+  if(/remote|international|work from home|wfh|abroad|রিমোট|বিদেশ/.test(low))f.cat='remote';
+  else if(/private|company|non.?gov|বেসরকারি|ngo/.test(low))f.cat='private';
+  else if(/gov|সরকারি/.test(low))f.cat='gov';
+  if(/today|আজ/.test(low))f.within=1;else if(/week|7 days|সপ্তাহ/.test(low))f.within=7;else if(/month|মাস/.test(low))f.within=30;
+  f.fit=/for me|my resume|my cv|suitable|match|আমার/.test(low);
+  const drop=new Set('gov govt government private company remote international today week month deadline me my resume cv suitable match find show search latest next days home abroad non only this within last date সরকারি বেসরকারি চাকরি'.split(' '));
+  f.base=tok(low).filter(w=>!drop.has(w));f.words=[...expand(f.base)];return f;
+}
+const ui={tab:'home',cat:'all',q:'',sort:'new',limit:30,rtab:'edit',mtab:''};
+function listJobs(){
+  let arr=DB.jobs.slice();const f=ui.q.trim()?smart(ui.q):null;const cat=(f&&f.cat)||ui.cat;
+  if(cat==='saved')arr=Object.values(S.favs);
+  else if(cat==='me')arr=arr.filter(j=>j._m>=20);
+  else if(cat==='week')arr=arr.filter(j=>j.deadline&&days(j.deadline)<=7);
+  else if(cat!=='all')arr=arr.filter(j=>j.cat===cat);
+  if(f&&f.within)arr=arr.filter(j=>j.deadline&&days(j.deadline)<=f.within);
+  if(f&&f.words.length){
+    arr=arr.map(j=>{const t=j.title.toLowerCase(),all=(j.org+' '+(j.tags||[]).join(' ')+' '+j.desc+' '+j.loc).toLowerCase();let s=0;f.words.forEach(w=>{if(t.includes(w))s+=f.base.includes(w)?4:2;else if(all.includes(w))s+=1});return[s,j]}).filter(x=>x[0]>0).sort((a,b)=>b[0]-a[0]||(b[1]._m||0)-(a[1]._m||0)).map(x=>x[1]);
+  }else if(ui.sort==='match'||(f&&f.fit)||cat==='me')arr.sort((a,b)=>(b._m||0)-(a._m||0));
+  else if(ui.sort==='deadline'||cat==='week')arr.sort((a,b)=>(a.deadline||'9')<(b.deadline||'9')?-1:1);
+  return arr;
+}
+const findJob=id=>DB.jobs.find(j=>j.id===id)||S.favs[id];
+const CATNAME={gov:'Govt',private:'Private',remote:'Remote'};
+
+/* ---------- alerts ---------- */
+const GENERIC=new Set('bangladesh limited ltd company officer assistant engineer senior junior general manager sample'.split(' '));
+function matchNotices(p){const w=[...new Set(tok(p.org+' '+p.title))].filter(x=>x.length>2&&!GENERIC.has(x));if(!w.length)return[];return DB.notices.filter(n=>{const t=n.title.toLowerCase();return w.filter(x=>t.includes(x)).length>=Math.min(2,w.length)})}
+function alerts(){
+  const a=[];
+  S.apps.forEach(p=>{
+    [['examDate','Exam'],['vivaDate','Viva']].forEach(([k,l])=>{if(p[k]){const d=days(p[k]);if(d>=0&&d<=7)a.push({k:p.id+k+p[k],t:l+' '+inDays(d)+': '+p.title})}});
+    matchNotices(p).slice(0,2).forEach(n=>a.push({k:p.id+n.id,t:'Possible update for '+(p.org||p.title)+': '+n.title,url:n.url}));
+  });
+  Object.values(S.favs).forEach(j=>{if(j.deadline){const d=days(j.deadline);if(d>=0&&d<=3&&!S.apps.some(p=>p.jobId===j.id))a.push({k:'f'+j.id+j.deadline,t:'Last date '+inDays(d)+': '+j.title,url:j.url})}});
+  return a;
+}
+async function notify(){
+  const a=alerts();const b=$('#bell');b.innerHTML='🔔'+(a.length?'<span class="dot">'+a.length+'</span>':'');
+  const fresh=a.filter(x=>!S.seen[x.k]);if(!fresh.length||!S.settings.notify)return;
+  try{if(Notification.permission!=='granted')return;const body=fresh.slice(0,3).map(x=>x.t).join('\n');
+    const reg=navigator.serviceWorker&&await navigator.serviceWorker.getRegistration();
+    if(reg)reg.showNotification('Chakri Finder',{body,icon:'icon-192.png'});else new Notification('Chakri Finder',{body});
+    fresh.forEach(x=>S.seen[x.k]=1);save()}catch(e){}
+}
+
+/* ---------- views ---------- */
+function jobCard(j){
+  const fav=!!S.favs[j.id],ap=S.apps.some(p=>p.jobId===j.id),d=j.deadline?days(j.deadline):null;
+  return `<div class="card"><div class="row"><span class="tag ${esc(j.cat)}">${CATNAME[j.cat]||'Job'}</span><span class="src">${esc(j.src)}</span>${j._m?`<span class="match">${j._m}% match</span>`:''}</div>
+  <h3>${esc(j.title)}</h3><div class="meta">${esc([j.org,j.loc].filter(Boolean).join(' · '))}</div>
+  ${j.desc?`<p class="desc">${esc(j.desc)}</p>`:''}
+  <div class="meta">${j.deadline?`<b style="color:${d<=3?'var(--bad)':'var(--ok)'}">Last date ${nice(j.deadline)} (${inDays(d)})</b>`:'Last date: see circular'}${j.posted?' · Posted '+nice(j.posted):''}</div>
+  <div class="btns"><a class="btn pri" href="${esc(j.url)}" target="_blank" rel="noopener">View &amp; apply</a>
+  <button class="btn" data-act="fav" data-id="${esc(j.id)}">${fav?'★ Saved':'☆ Save'}</button>
+  <button class="btn" data-act="markApplied" data-id="${esc(j.id)}">${ap?'✓ Applied':'Mark applied'}</button>
+  <button class="btn" data-act="tailor" data-id="${esc(j.id)}">Tailor CV</button></div></div>`;
+}
+function monthCount(k){const m=today().slice(0,7);return S.apps.filter(p=>p[k]&&p[k].slice(0,7)===m).length}
+const V={};
+V.home=()=>{
+  const a=alerts(),wk=DB.jobs.filter(j=>j.deadline&&days(j.deadline)<=7).length,me=DB.jobs.filter(j=>j._m>=20).length;
+  const top=DB.jobs.filter(j=>j._m>=20).sort((x,y)=>y._m-x._m).slice(0,4);
+  const tile=(n,l,act,hot)=>`<button class="tile ${hot&&n?'hot':''}" ${act}><b>${n}</b><span>${l}</span></button>`;
+  return `<div class="card hero"><h3>Assalamu Alaikum${S.profile.name?', '+esc(S.profile.name.split(' ').slice(-2,-1)[0]||S.profile.name):''}</h3><p>${DB.jobs.length} open jobs collected${me?', '+me+' match your resume':''}.</p></div>
+  ${DB.demo?'<div class="banner">Showing sample cards. Real jobs appear after the automatic collector runs for the first time.</div>':''}
+  ${!S.profile.title?'<div class="banner">Add your resume first so jobs can be matched to you. <button class="btn" data-act="go" data-tab="resume">Open resume</button></div>':''}
+  <div class="grid">
+  ${tile(DB.jobs.length,'Available jobs','data-act="cat" data-cat="all"')}
+  ${tile(me,'Matched for me','data-act="cat" data-cat="me"')}
+  ${tile(S.apps.length,'Applied jobs','data-act="go" data-tab="applied"')}
+  ${tile(wk,'Last date within 7 days','data-act="cat" data-cat="week"',1)}
+  ${tile(monthCount('examDate'),'Exams this month','data-act="go" data-tab="applied"',1)}
+  ${tile(monthCount('vivaDate'),'Viva this month','data-act="go" data-tab="applied"',1)}
+  ${tile(DB.jobs.filter(j=>j.cat==='gov').length,'Government','data-act="cat" data-cat="gov"')}
+  ${tile(DB.jobs.filter(j=>j.cat==='remote').length,'Remote international','data-act="cat" data-cat="remote"')}
+  </div>
+  <h2>Needs your attention</h2>
+  ${a.length?a.map(x=>`<div class="card alert">${esc(x.t)}${x.url?` <a href="${esc(x.url)}" target="_blank" rel="noopener">Open</a>`:''}</div>`).join(''):'<div class="card meta">Nothing urgent. Exam dates, viva dates, last dates of saved jobs and admit/result news for your applications show up here.</div>'}
+  ${top.length?'<h2>Best matches for your resume</h2>'+top.map(jobCard).join(''):''}`;
+};
+V.jobs=()=>{
+  const arr=listJobs(),chips=[['all','All'],['me','For me'],['gov','Govt'],['private','Private'],['remote','Remote'],['week','Closing soon'],['saved','Saved']];
+  const kw=encodeURIComponent(ui.q.trim()||S.profile.title||'engineer');
+  return `<div class="search"><input id="q" placeholder="Try: govt electrical engineer this week" value="${esc(ui.q)}" enterkeyhint="search"><button class="btn pri" data-act="search">Search</button></div>
+  <div class="chips">${chips.map(c=>`<button class="${ui.cat===c[0]?'on':''}" data-act="cat" data-cat="${c[0]}">${c[1]}</button>`).join('')}</div>
+  <div class="row"><span class="meta">${arr.length} jobs</span><select id="sort" style="width:auto;margin-left:auto;padding:6px 8px"><option value="new">Newest</option><option value="match">Best match</option><option value="deadline">Last date</option></select>
+  ${S.settings.aiKey&&ui.q.trim()?'<button class="btn" data-act="aiSearch">Ask AI</button>':''}</div>
+  <div id="ai"></div>
+  ${arr.slice(0,ui.limit).map(jobCard).join('')||'<div class="empty">No jobs found. Try fewer words or another tab.</div>'}
+  ${arr.length>ui.limit?'<button class="btn wide" data-act="more">Show more</button>':''}
+  <h2>Search the same thing elsewhere</h2>
+  <div class="btns"><a class="btn" target="_blank" rel="noopener" href="https://jobs.bdjobs.com/jobsearch.asp?txtsearch=${kw}">bdjobs</a>
+  <a class="btn" target="_blank" rel="noopener" href="https://www.linkedin.com/jobs/search/?keywords=${kw}&location=Bangladesh">LinkedIn</a>
+  <a class="btn" target="_blank" rel="noopener" href="https://www.facebook.com/search/posts/?q=${kw}%20job%20circular">Facebook</a>
+  <a class="btn" target="_blank" rel="noopener" href="https://www.google.com/search?q=${kw}+jobs+in+Bangladesh&ibp=htl;jobs">Google Jobs</a>
+  <a class="btn" target="_blank" rel="noopener" href="https://alljobs.teletalk.com.bd">Teletalk All Jobs</a></div>`;
+};
+const STATUS=['Applied','Admit card published','Exam done','Viva','Passed','Failed'];
+V.applied=()=>{
+  const list=S.apps.slice().sort((a,b)=>(a.examDate||a.vivaDate||'9')<(b.examDate||b.vivaDate||'9')?-1:1);
+  return `<button class="btn pri wide" data-act="editApp">+ Add an application</button>
+  ${list.map(p=>{const n=matchNotices(p).slice(0,3);return `<div class="card"><div class="row"><span class="tag ${p.status==='Passed'?'ok':p.status==='Failed'?'bad':''}">${esc(p.status)}</span><span class="src">Applied ${nice(p.appliedOn)}</span></div>
+  <h3>${esc(p.title)}</h3><div class="meta">${esc(p.org)}</div>
+  <div class="meta">${p.examDate?'Exam: <b>'+nice(p.examDate)+'</b> ':''}${p.vivaDate?'· Viva: <b>'+nice(p.vivaDate)+'</b>':''}</div>
+  ${p.userId?`<div class="copy"><span><small>User ID</small>${esc(p.userId)}</span><button class="btn" data-act="copy" data-v="${esc(p.userId)}">Copy</button></div>`:''}
+  ${p.password?`<div class="copy"><span><small>Password</small>••••••••</span><button class="btn" data-act="copy" data-v="${esc(p.password)}">Copy</button></div>`:''}
+  ${p.notes?`<p class="desc">${esc(p.notes)}</p>`:''}
+  ${n.length?'<div class="banner"><b>Possible news for this application</b>'+n.map(x=>`<div><a href="${esc(x.url)}" target="_blank" rel="noopener">${esc(x.title)}</a></div>`).join('')+'</div>':''}
+  <div class="btns">${p.url?`<a class="btn pri" href="${esc(p.url)}" target="_blank" rel="noopener">Open portal (admit/result)</a>`:''}
+  <button class="btn" data-act="editApp" data-id="${p.id}">Edit</button>
+  <button class="btn" data-act="pickFile" data-kind="admit" data-app="${p.id}">Attach admit/result</button>
+  ${p.examDate||p.vivaDate?`<button class="btn" data-act="ics" data-id="${p.id}">Add to calendar</button>`:''}</div>
+  <div id="files-${p.id}" class="meta"></div></div>`}).join('')||'<div class="empty">No applications yet. Tap “Mark applied” on a job, or add one here, to keep your user ID, password, exam date, admit card and result in one place.</div>'}`;
+};
+const RFIELDS=[['name','Full name'],['title','Current designation / profession'],['email','Email'],['phone','Phone'],['address','Address'],['linkedin','LinkedIn link']];
+const LISTS={experience:['Experience','Role / position','Organisation','Period (e.g. 2023 – present)','What you did'],education:['Education','Degree','Institute','Year / result',''],training:['Training & certifications','Course / certificate','Provider','Year','']};
+function listEditor(k){const L=LISTS[k];return `<h2>${L[0]}</h2>${S.profile[k].map((e,i)=>`<div class="card"><input data-list="${k}" data-i="${i}" data-f="a" placeholder="${L[1]}" value="${esc(e.a)}"><div class="two" style="margin-top:8px"><input data-list="${k}" data-i="${i}" data-f="b" placeholder="${L[2]}" value="${esc(e.b)}"><input data-list="${k}" data-i="${i}" data-f="c" placeholder="${L[3]}" value="${esc(e.c)}"></div>${L[4]?`<textarea style="margin-top:8px" data-list="${k}" data-i="${i}" data-f="d" placeholder="${L[4]}">${esc(e.d)}</textarea>`:''}<div class="btns"><button class="btn danger" data-act="delRow" data-list="${k}" data-i="${i}">Remove</button></div></div>`).join('')}<button class="btn" data-act="addRow" data-list="${k}">+ Add ${L[0].toLowerCase()}</button>`}
+function cvHtml(){
+  const p=S.profile,t=S.tailor,skills=(t?t.skills:p.skills.split(',').map(s=>s.trim()).filter(Boolean));
+  const sec=(k,h)=>p[k].length?`<h4>${h}</h4>`+p[k].map(e=>`<div class="item"><b>${esc(e.a)}</b><span class="sub">${esc([e.b,e.c].filter(Boolean).join(' · '))}</span>${e.d?'<div>'+esc(e.d).replace(/\n/g,'<br>')+'</div>':''}</div>`).join(''):'';
+  return `<div id="cv"><h1>${esc(p.name||'Your name')}</h1><div class="sub">${esc(p.title)}</div><div class="sub">${esc([p.email,p.phone,p.address,p.linkedin].filter(Boolean).join(' · '))}</div>
+  ${(t?t.summary:p.summary)?`<h4>Profile</h4><div>${esc(t?t.summary:p.summary)}</div>`:''}${sec('experience','Experience')}${sec('education','Education')}
+  ${skills.length?`<h4>Skills</h4><div>${esc(skills.join(' · '))}</div>`:''}${sec('training','Training & certifications')}
+  ${p.extras?`<h4>Other information</h4><div>${esc(p.extras).replace(/\n/g,'<br>')}</div>`:''}</div>`;
+}
+V.resume=()=>{
+  const p=S.profile,tabs=[['edit','Edit'],['preview','Preview / PDF'],['tailor','Tailor'],['certs','Certificates']];
+  let body='';
+  if(ui.rtab==='edit')body=`<div class="card">${RFIELDS.map(f=>`<label>${f[1]}</label><input data-p="${f[0]}" value="${esc(p[f[0]])}">`).join('')}
+    <label>Profile summary</label><textarea data-p="summary">${esc(p.summary)}</textarea>
+    <label>Skills (separate with commas) – used to match jobs</label><textarea data-p="skills">${esc(p.skills)}</textarea>
+    <label>Other information</label><textarea data-p="extras">${esc(p.extras)}</textarea></div>
+    ${listEditor('experience')}${listEditor('education')}${listEditor('training')}<p class="meta">Everything saves automatically on this phone.</p>`;
+  if(ui.rtab==='preview')body=`<div class="btns noprint"><button class="btn pri" data-act="print">Print / Save as PDF</button>${S.tailor?`<button class="btn" data-act="untailor">Back to general version</button>`:''}</div>${S.tailor?`<div class="banner noprint">Tailored for: ${esc(S.tailor.jobTitle)}</div>`:''}${cvHtml()}`;
+  if(ui.rtab==='tailor'){const t=S.tailor;body=t?`<div class="card"><div class="meta">Tailored for</div><h3>${esc(t.jobTitle)}</h3><div class="meta">${esc(t.org)}</div>
+    <label>Profile summary for this job</label><textarea id="tsum">${esc(t.summary)}</textarea>
+    <label>Skills order (most relevant first)</label><div class="desc">${esc(t.skills.join(' · '))||'Add skills in the Edit tab.'}</div>
+    ${t.missing.length?`<label>Words in the circular that your resume does not mention</label><div class="desc">${esc(t.missing.join(', '))}</div><p class="meta">Add the ones that are truly yours to your skills or experience.</p>`:''}
+    <label>Cover letter</label><textarea id="tlet" style="min-height:220px">${esc(t.letter)}</textarea>
+    <div class="btns"><button class="btn pri" data-act="saveTailor">Save &amp; preview CV</button><button class="btn" data-act="copy" data-from="tlet">Copy letter</button>${S.settings.aiKey?'<button class="btn" data-act="aiTailor">Improve with AI</button>':''}</div></div>`
+    :'<div class="empty">Tap “Tailor CV” on any job. The app reorders your skills for that job, writes a matching summary and cover letter, and lists what the circular asks for that your resume is missing.</div>'}
+  if(ui.rtab==='certs')body=`<button class="btn pri wide" data-act="pickFile" data-kind="cert">+ Add certificate, photo, signature or document</button><p class="meta">Files stay on this phone only. Keep your photo (300×300) and signature (300×80) here for Teletalk forms.</p><div id="certs"></div>`;
+  return `<div class="chips noprint">${tabs.map(t=>`<button class="${ui.rtab===t[0]?'on':''}" data-act="rtab" data-t="${t[0]}">${t[1]}</button>`).join('')}</div>${body}`;
+};
+const GUIDES=[
+ ['Government jobs on Teletalk (xxx.teletalk.com.bd)',['Open the application website written in the circular, for example dae.teletalk.com.bd.','Tap “Application Form”, choose the post, then Next.','Choose whether you are an alljobs.teletalk.com.bd premium member.','Fill in personal, academic and contact details exactly as in your certificates. Use the copy buttons below.','Upload a colour photo (300×300 px, max 100 KB) and signature (300×80 px, max 60 KB).','Submit and download the Applicant’s Copy. It contains your User ID.','Pay the fee from a Teletalk prepaid SIM by two SMS to 16222 within 72 hours. The reply SMS gives your password.','Save the User ID and password in the Applied tab. Nothing can be changed after payment.']],
+ ['BCS and other BPSC exams',['Go to bpsc.teletalk.com.bd and choose the exam.','Fill in BPSC Form-1 in three parts: personal, education, cadre choice.','Upload photo and signature, submit, and keep the Applicant’s Copy.','Pay the fee by Teletalk SMS within 72 hours.','Admit card, seat plan and results are published on bpsc.gov.bd and the same Teletalk site.']],
+ ['Bangladesh Bank and state-owned banks',['Create a CV once at erecruitment.bb.org.bd (CV Identification Number and password).','Open the circular there, tap Apply Online and confirm.','Pay the fee through the method in the circular (often Rocket or bKash).','Download the tracking page. The admit card comes on the same site before the exam.']],
+ ['Private jobs (bdjobs, company sites, email)',['Complete your bdjobs profile once; “Apply Online” then sends that profile.','For email applications, use Tailor to prepare a CV and cover letter for that job and send the PDF.','Use the exact subject line the circular asks for.','Add the job to Applied so follow-up dates are not missed.']],
+ ['Remote international jobs',['Use a one-page English CV in PDF, tailored to the job’s keywords.','Check the “location” line: many remote jobs accept only some countries.','Keep a LinkedIn profile that matches the CV.','Never pay to apply. Real employers do not charge fees.']]];
+const COURSES=[
+ ['Nuclear & power','IAEA online learning (free)','https://www.iaea.org/online-learning',['nuclear','power','energy']],
+ ['Nuclear & power','NPTEL – IIT courses in electrical & nuclear engineering (free)','https://nptel.ac.in/courses',['electrical','nuclear','power','engineer','eee']],
+ ['Engineering','MIT OpenCourseWare – Electrical Engineering (free)','https://ocw.mit.edu/search/?d=Electrical%20Engineering%20and%20Computer%20Science',['electrical','eee','engineer']],
+ ['Project & finance','Coursera – project finance and infrastructure courses (audit free)','https://www.coursera.org/search?query=project%20finance%20infrastructure',['finance','infrastructure','project']],
+ ['Project & finance','edX – project management courses (audit free)','https://www.edx.org/search?q=project%20management',['project','management']],
+ ['Renewable energy','Coursera – solar and renewable energy (audit free)','https://www.coursera.org/search?query=solar%20energy',['energy','solar','power','renewable']],
+ ['Government (Bangladesh)','Muktopaath – free government e-learning with certificates','https://muktopaath.gov.bd',[]],
+ ['Career skills','Grow with Google career certificates','https://grow.google/certificates/',[]],
+ ['Career skills','Alison – free certificate courses','https://alison.com/courses',[]],
+ ['Data & software','freeCodeCamp – free coding certifications','https://www.freecodecamp.org/learn',['software','data','it']]];
+const QBANK=[['BCS preliminary previous questions','BCS preliminary previous years question solution pdf'],['Bank recruitment (BSCS) previous questions','Bangladesh Bank BSCS previous year question solution'],['PDB / PGCB / DESCO / DPDC / NESCO / EGCB Assistant Engineer (EEE)','PGCB DESCO DPDC NESCO PDB assistant engineer EEE previous question solution'],['NPCBL / Rooppur nuclear plant recruitment','NPCBL assistant manager EEE recruitment exam question solution'],['BUET-pattern departmental EEE questions','EEE job preparation BUET pattern written question solution'],['Non-cadre and 9th/10th grade technical posts','PSC non cadre assistant engineer electrical previous question']];
+V.more=()=>{
+  const p=S.profile,w=profileWords(),copy=(l,v)=>v?`<div class="copy"><span><small>${l}</small>${esc(v)}</span><button class="btn" data-act="copy" data-v="${esc(v)}">Copy</button></div>`:'';
+  const rec=COURSES.map(c=>[c[3].filter(x=>w.has(x)).length,c]).sort((a,b)=>b[0]-a[0]);
+  const kw=encodeURIComponent(p.title||'engineering');
+  return `<h2>How to apply</h2>${GUIDES.map(g=>`<details><summary>${g[0]}</summary><ol>${g[1].map(s=>`<li>${s}</li>`).join('')}</ol></details>`).join('')}
+  <details><summary>My details – tap to copy into forms</summary>${copy('Name',p.name)}${copy('Email',p.email)}${copy('Phone',p.phone)}${copy('Address',p.address)}${p.education.map(e=>copy('Education',[e.a,e.b,e.c].filter(Boolean).join(', '))).join('')||''}${!p.name?'<p class="meta">Fill in your resume first.</p>':''}</details>
+  <h2>Exam, admit card and result news</h2>
+  ${DB.notices.slice(0,8).map(n=>`<div class="card"><a href="${esc(n.url)}" target="_blank" rel="noopener">${esc(n.title)}</a><div class="meta">${esc(n.src)}${n.posted?' · '+nice(n.posted):''}</div></div>`).join('')||'<div class="card meta">News about exam dates, admit cards and results is collected automatically and listed here.</div>'}
+  <h2>Courses and certifications for you</h2>
+  ${rec.map(([s,c])=>`<div class="card"><div class="row"><span class="tag">${c[0]}</span>${s?'<span class="match">Fits your profile</span>':''}</div><a href="${c[2]}" target="_blank" rel="noopener">${c[1]}</a></div>`).join('')}
+  <div class="btns"><a class="btn" target="_blank" rel="noopener" href="https://www.coursera.org/search?query=${kw}">More on Coursera</a><a class="btn" target="_blank" rel="noopener" href="https://www.edx.org/search?q=${kw}">More on edX</a></div>
+  <h2>Previous exam questions</h2>
+  ${QBANK.map(q=>`<div class="card"><b>${q[0]}</b><div class="btns"><a class="btn" target="_blank" rel="noopener" href="https://www.google.com/search?q=${encodeURIComponent(q[1])}">Find questions</a><a class="btn" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=${encodeURIComponent(q[1])}">Video solutions</a></div></div>`).join('')}
+  <h2>Settings</h2>
+  <div class="card"><label>Phone notifications when the app opens</label><button class="btn" data-act="notifyOn">${S.settings.notify?'On – tap to turn off':'Turn on'}</button>
+  <label>Optional free AI key (Google AI Studio) for “Ask AI” and “Improve with AI”</label><input id="aikey" type="password" placeholder="Paste key (stays on this phone)" value="${esc(S.settings.aiKey)}">
+  <label>AI model name</label><input id="aimodel" value="${esc(S.settings.aiModel)}">
+  <label>Backup (resume, applications, saved jobs)</label><div class="btns"><button class="btn" data-act="backup">Download backup</button><button class="btn" data-act="restore">Restore / import file</button></div>
+  <p class="meta">Passwords and files are stored only in this phone’s browser. Download a backup regularly; clearing browser data deletes them.</p></div>
+  <details><summary>Job sources status</summary>${(DB.status||[]).map(s=>`<div class="copy"><span>${esc(s.source)}<small>${s.ok?s.jobs+' jobs'+(s.notices?', '+s.notices+' notices':''):esc(s.error)}</small></span><span class="tag ${s.ok?'ok':'bad'}">${s.ok?'OK':'Failed'}</span></div>`).join('')||'<p class="meta">No collection has run yet.</p>'}</details>`;
+};
+
+/* ---------- render ---------- */
+const TABS=[['home','Home','<path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>'],['jobs','Jobs','<circle cx="11" cy="11" r="7"/><path d="M21 21l-4.5-4.5"/>'],['applied','Applied','<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4h6v3H9zM9 13l2 2 4-4"/>'],['resume','Resume','<path d="M7 3h8l4 4v14H7z"/><path d="M10 12h6M10 16h6M10 8h3"/>'],['more','More','<circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/>']];
+function render(keep){
+  $('#tabs').innerHTML=TABS.map(t=>`<button class="${ui.tab===t[0]?'on':''}" data-act="go" data-tab="${t[0]}"><svg viewBox="0 0 24 24">${t[2]}</svg>${t[1]}</button>`).join('');
+  $('#view').innerHTML=V[ui.tab]();
+  if(ui.tab==='jobs'){$('#sort').value=ui.sort}
+  if(ui.tab==='applied'||(ui.tab==='resume'&&ui.rtab==='certs'))drawFiles();
+  if(!keep)window.scrollTo(0,0);
+  notify();
+}
+async function drawFiles(){
+  const all=await Files.all();
+  const row=f=>`<div class="copy"><span>${esc(f.name)}<small>${nice(f.added)}</small></span><span class="row"><button class="btn" data-act="openFile" data-id="${f.id}">Open</button><button class="btn danger" data-act="delFile" data-id="${f.id}">✕</button></span></div>`;
+  const c=$('#certs');if(c)c.innerHTML=all.filter(f=>f.kind==='cert').map(row).join('')||'<div class="empty">No files yet.</div>';
+  S.apps.forEach(p=>{const e=$('#files-'+p.id);if(e)e.innerHTML=all.filter(f=>f.app===p.id).map(row).join('')});
+}
+function modal(html){$('#sheet').innerHTML=html;$('#modal').classList.add('on')}
+function closeModal(){$('#modal').classList.remove('on')}
+function appForm(p){
+  const f=(k,l,t)=>`<label>${l}</label><input id="a-${k}" type="${t||'text'}" value="${esc(p[k]||'')}">`;
+  modal(`<h2 style="margin-top:0">${p.id?'Edit application':'Add application'}</h2>${f('title','Post / job title')}${f('org','Organisation')}${f('url','Portal link (where admit card and result appear)','url')}
+  <div class="two"><div>${f('userId','User ID')}</div><div>${f('password','Password')}</div></div>
+  <div class="two"><div>${f('appliedOn','Applied on','date')}</div><div><label>Status</label><select id="a-status">${STATUS.map(s=>`<option ${p.status===s?'selected':''}>${s}</option>`).join('')}</select></div></div>
+  <div class="two"><div>${f('examDate','Exam date','date')}</div><div>${f('vivaDate','Viva date','date')}</div></div>
+  <label>Notes (roll, centre, fee, result details)</label><textarea id="a-notes">${esc(p.notes||'')}</textarea>
+  <div class="btns"><button class="btn pri" data-act="saveApp" data-id="${p.id||''}" data-job="${esc(p.jobId||'')}">Save</button><button class="btn" data-act="close">Cancel</button>${p.id?`<button class="btn danger" data-act="delApp" data-id="${p.id}">Delete</button>`:''}</div>`);
+}
+function tailorFor(j){
+  const p=S.profile,jw=[...new Set(tok(j.title+' '+(j.tags||[]).join(' ')+' '+j.desc))].slice(0,40);
+  const skills=p.skills.split(',').map(s=>s.trim()).filter(Boolean);
+  const hit=s=>{const l=s.toLowerCase();return jw.some(w=>l.includes(w)||(SYN[w]||[]).some(x=>l.includes(x)))};
+  const first=skills.filter(hit),rest=skills.filter(s=>!hit(s));
+  const mine=JSON.stringify(p).toLowerCase(),noise=new Set('govt government application deadline teletalk apply candidates candidate position vacancy vacancies recruitment notice post posts published january february march april june july august september october november december'.split(' ')),missing=jw.filter(w=>w.length>3&&!noise.has(w)&&!mine.includes(w)).slice(0,12);
+  const deg=p.education[0]?p.education[0].a:'',exp=p.experience[0];
+  const summary=`${p.title||'Professional'}${deg?' with '+deg:''}, applying for ${j.title}${j.org?' at '+j.org:''}. ${first.length?'Relevant strengths: '+first.slice(0,5).join(', ')+'. ':''}${p.summary||''}`.trim();
+  const letter=`Dear Hiring Manager,\n\nI am writing to apply for the position of ${j.title}${j.org?' at '+j.org:''}. ${exp?'I currently work as '+exp.a+(exp.b?' at '+exp.b:'')+'. ':''}${deg?'I hold '+deg+(p.education[0].b?' from '+p.education[0].b:'')+'. ':''}\n\n${first.length?'My background in '+first.slice(0,4).join(', ')+' matches the requirements of this role. ':''}I am confident that I can contribute from the first day and I am eager to learn what the position demands.\n\nMy resume is attached. I would welcome the opportunity to discuss my application.\n\nSincerely,\n${p.name}\n${p.phone}\n${p.email}`;
+  return{jobId:j.id,jobTitle:j.title,org:j.org||'',desc:j.desc||'',skills:[...first,...rest],missing,summary,letter};
+}
+async function askAI(prompt){
+  const r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+encodeURIComponent(S.settings.aiModel)+':generateContent?key='+encodeURIComponent(S.settings.aiKey),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:prompt}]}]})});
+  const d=await r.json();if(!r.ok)throw new Error(d.error&&d.error.message||'AI request failed');
+  return d.candidates[0].content.parts.map(x=>x.text).join('');
+}
+const profileText=()=>{const p=S.profile;return [p.title,p.summary,'Skills: '+p.skills,'Experience: '+p.experience.map(e=>e.a+' at '+e.b+' '+e.c+' '+e.d).join('; '),'Education: '+p.education.map(e=>e.a+', '+e.b).join('; ')].join('\n')};
+
+/* ---------- actions ---------- */
+const A={
+  go(d){ui.tab=d.tab;render()},
+  cat(d){ui.tab='jobs';ui.cat=d.cat;ui.limit=30;render()},
+  search(){ui.q=$('#q').value;ui.limit=30;render()},
+  more(){ui.limit+=30;render(true)},
+  rtab(d){ui.rtab=d.t;render()},
+  fav(d){const j=findJob(d.id);if(!j)return;if(S.favs[j.id])delete S.favs[j.id];else S.favs[j.id]=j;save();render(true)},
+  markApplied(d){const j=findJob(d.id);if(!j)return;const ex=S.apps.find(p=>p.jobId===j.id);appForm(ex||{title:j.title,org:j.org,url:j.url,appliedOn:today(),status:'Applied',jobId:j.id})},
+  editApp(d){appForm(S.apps.find(p=>p.id===d.id)||{appliedOn:today(),status:'Applied'})},
+  saveApp(d){const g=k=>$('#a-'+k).value.trim();if(!g('title'))return toast('Add the job title');
+    const p={id:d.id||uid(),jobId:d.job||'',title:g('title'),org:g('org'),url:g('url'),userId:g('userId'),password:g('password'),appliedOn:g('appliedOn'),status:g('status'),examDate:g('examDate'),vivaDate:g('vivaDate'),notes:g('notes')};
+    const i=S.apps.findIndex(x=>x.id===p.id);if(i>=0)S.apps[i]=p;else S.apps.push(p);save();closeModal();ui.tab='applied';render();toast('Saved')},
+  delApp(d){if(!confirm('Delete this application?'))return;S.apps=S.apps.filter(p=>p.id!==d.id);save();closeModal();render()},
+  close(){closeModal()},
+  copy(d){const v=d.from?$('#'+d.from).value:d.v;(navigator.clipboard?navigator.clipboard.writeText(v):Promise.reject()).then(()=>toast('Copied'),()=>toast('Copy not available here'))},
+  ics(d){const p=S.apps.find(x=>x.id===d.id);const ev=(dt,l)=>dt?`BEGIN:VEVENT\r\nUID:${p.id}${l}@chakri\r\nDTSTAMP:${today().replace(/-/g,'')}T000000Z\r\nDTSTART;VALUE=DATE:${dt.replace(/-/g,'')}\r\nSUMMARY:${l}: ${p.title.replace(/[,;]/g,' ')}\r\nBEGIN:VALARM\r\nTRIGGER:-P1D\r\nACTION:DISPLAY\r\nDESCRIPTION:${l} tomorrow\r\nEND:VALARM\r\nEND:VEVENT\r\n`:'';
+    download('exam-dates.ics','BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Chakri Finder//EN\r\n'+ev(p.examDate,'Exam')+ev(p.vivaDate,'Viva')+'END:VCALENDAR\r\n','text/calendar')},
+  pickFile(d){const i=document.createElement('input');i.type='file';i.multiple=true;i.accept='image/*,application/pdf,.doc,.docx';i.onchange=async()=>{for(const f of i.files)await Files.put({id:uid(),name:f.name,type:f.type,kind:d.kind,app:d.app||'',added:today(),blob:f});toast('Saved on this phone');drawFiles()};i.click()},
+  async openFile(d){const f=(await Files.all()).find(x=>x.id===d.id);if(f)window.open(URL.createObjectURL(f.blob),'_blank')},
+  async delFile(d){if(!confirm('Remove this file?'))return;await Files.del(d.id);drawFiles()},
+  addRow(d){S.profile[d.list].push({a:'',b:'',c:'',d:''});save();render(true)},
+  delRow(d){S.profile[d.list].splice(+d.i,1);save();render(true)},
+  print(){window.print()},
+  tailor(d){const j=findJob(d.id);if(!j)return;S.tailor=tailorFor(j);save();ui.tab='resume';ui.rtab='tailor';render()},
+  saveTailor(){S.tailor.summary=$('#tsum').value;S.tailor.letter=$('#tlet').value;save();ui.rtab='preview';render()},
+  untailor(){S.tailor=null;save();render()},
+  async aiTailor(){toast('Asking AI…');try{const t=S.tailor;const out=await askAI(`Write (1) a 3-sentence resume profile summary and (2) a short cover letter for this job, using only facts from the resume. Do not invent experience.\nJOB: ${t.jobTitle} at ${t.org}. ${t.desc}\nRESUME:\n${S.profile.name}\n${profileText()}\nReply exactly as: SUMMARY: ... LETTER: ...`);
+    const m=out.match(/SUMMARY:\s*([\s\S]*?)LETTER:\s*([\s\S]*)/);if(m){t.summary=m[1].trim();t.letter=m[2].trim();save();render(true);toast('Updated by AI')}else toast('AI reply not understood')}catch(e){toast(e.message)}},
+  async aiSearch(){const arr=listJobs().slice(0,40);$('#ai').innerHTML='<div class="banner">Asking AI…</div>';try{const out=await askAI(`A job seeker asks: "${ui.q}".\nTheir resume:\n${profileText()}\nFrom the numbered jobs below choose up to 5 best fits. Reply one per line as: number | short reason.\n`+arr.map((j,i)=>`${i+1}. ${j.title} – ${j.org} – ${j.loc} – ${j.desc.slice(0,120)}`).join('\n'));
+    const picks=out.split('\n').map(l=>l.match(/^\D*(\d+)\s*\|\s*(.+)/)).filter(Boolean).map(m=>[arr[+m[1]-1],m[2]]).filter(x=>x[0]);
+    $('#ai').innerHTML='<h2>AI picks</h2>'+(picks.map(([j,why])=>`<div class="banner">${esc(why)}</div>`+jobCard(j)).join('')||'<div class="banner">AI found no clear fit.</div>')}catch(e){$('#ai').innerHTML='<div class="banner">'+esc(e.message)+'</div>'}},
+  async notifyOn(){if(S.settings.notify){S.settings.notify=false}else{try{const r=await Notification.requestPermission();S.settings.notify=r==='granted';if(r!=='granted')toast('Notifications are blocked in this browser')}catch(e){toast('Notifications are not available here')}}save();render(true)},
+  backup(){download('chakri-finder-backup-'+today()+'.json',JSON.stringify(S,null,1),'application/json')},
+  restore(){const i=document.createElement('input');i.type='file';i.accept='.json,application/json';i.onchange=async()=>{try{const o=JSON.parse(await i.files[0].text());S=merge(Object.assign({},S,o));save();scoreAll();render();toast('Imported')}catch(e){toast('That file could not be read')}};i.click()}
+};
+document.addEventListener('click',e=>{if(e.target.id==='modal')return closeModal();const b=e.target.closest('[data-act]');if(b&&A[b.dataset.act]){A[b.dataset.act](b.dataset)}});
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.id==='q')A.search()});
+document.addEventListener('change',e=>{const t=e.target;
+  if(t.id==='sort'){ui.sort=t.value;render(true)}
+  if(t.id==='aikey'){S.settings.aiKey=t.value.trim();save()}
+  if(t.id==='aimodel'){S.settings.aiModel=t.value.trim();save()}});
+document.addEventListener('input',e=>{const t=e.target;
+  if(t.dataset.p){S.profile[t.dataset.p]=t.value;save();scoreAll()}
+  if(t.dataset.list){S.profile[t.dataset.list][+t.dataset.i][t.dataset.f]=t.value;save();scoreAll()}});
+
+(async()=>{render();await loadData();render();try{if('serviceWorker'in navigator&&location.protocol==='https:')navigator.serviceWorker.register('sw.js')}catch(e){}})();
+</script>
+</body>
+</html>
